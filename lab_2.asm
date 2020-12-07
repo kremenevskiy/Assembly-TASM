@@ -7,8 +7,6 @@ enter_second_number_msg db 10, 'Enter the second number: ', 10, '$'
 ans_msg db 10, 'Answer: ', 10, '$'
 remainder_msg db 'Remainder: ', 10, '$'
 newline db 10, '$'
-zero_exception_msg db 9, 'Division by ZERO EXCEPTION', 10, '$'
-error_msg db 10, 10, 9, 'ERROR', 10, '$'
 
 new_line db 10, '$'
 first_num dw ?
@@ -22,7 +20,7 @@ main PROC
     mov ax, @data
     mov ds, ax
     
-  start: 
+
     ; entering first number
     lea dx, enter_first_number_msg
     call print_str_dx
@@ -36,8 +34,6 @@ main PROC
     call cin
     mov second_num, ax
 
-    cmp second_num, 0 ; check 2nd number equal to zero
-      je divide_zero_exception
 
     ; division first number on second
     mov ax, first_num
@@ -68,20 +64,6 @@ main PROC
     int 21h
 
     RET
-
-    divide_zero_exception:
-      mov ah, 09h
-      lea dx, error_msg
-      int 21h
-      lea dx, zero_exception_msg
-      int 21h
-      lea dx, new_line
-      int 21h
-
-      mov first_num, 0
-      mov second_num, 0
-
-      jmp start
   
 main ENDP
 
@@ -166,9 +148,9 @@ cin PROC
         je backspace_clicked
 
       ; check num_boundaries 0-9
-      cmp last_symbol, 48d ; compare with 0
+      cmp last_symbol, 48d
         jc not_number
-      cmp last_symbol, 58d ; compare with 9
+      cmp last_symbol, 58d
         jnc not_number
 
        cmp dx, 6553d
@@ -204,15 +186,14 @@ cin PROC
     input_successful:
           
           ; check first symbol not zero
-          cmp cx, 1
+          cmp cx, 0
             jne print_num
 
-        check_zero:
-          cmp dx, 0
-            jne print_num
-          jmp get_number
 
-
+        check_first_symbol:
+            cmp last_symbol, 48d
+              je get_number
+        
           
        
             
@@ -220,7 +201,7 @@ cin PROC
 
           ; printing last entered symbol
         print_num:
-            push dx ; saving dx with number here
+            push dx ; saving dx, because we save number here
 
             mov dl, last_symbol
             mov ah, 02h
@@ -293,8 +274,5 @@ uses ax, bx, cx, dx
   
   RET
 remove_symbol ENDP
-
-
-
 
  end main
